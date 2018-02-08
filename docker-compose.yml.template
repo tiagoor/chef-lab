@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  chef-dk:
+    build: ./cluster/chef-dk/
+    image: chef-dk:{% include 'VERSION' %}
+    container_name: chef-dk
+    hostname: chef-dk
+    domainname: chef-lab.com
+    networks:
+      chef-lab.com:
+        ipv4_address: 10.5.0.1
+  chef-server:
+    build: ./cluster/chef-server/
+    image: chef-server:{% include 'VERSION' %}
+    container_name: chef-server
+    hostname: chef-server
+    domainname: chef-lab.com
+    networks:
+      chef-lab.com:
+        ipv4_address: 10.5.0.2
+{% for i in range(2) %}        
+  chef-client-{{ i + 1 }}:
+    build: ./cluster/chef-clients/
+    image: chef-clients:{% include 'VERSION' %}
+    container_name: chef-client-{{ i + 1 }}
+    hostname: chef-client-{{ i + 1 }}
+    domainname: chef-lab.com
+    networks:
+      chef-lab.com:
+        ipv4_address: 10.5.0.{{ i + 3 }}
+{% endfor %}
+
+networks:
+  chef-lab.com:
+    external: true
